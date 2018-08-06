@@ -1,7 +1,8 @@
 <?php
    class MyDB extends SQLite3 {
       function __construct() {
-         $this->open('test.db');
+      	 $iterator = new DirectoryIterator(dirname(__FILE__));
+         $this->open($iterator->getPath(). '/test.db');
       }
    }
    

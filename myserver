@@ -15,7 +15,7 @@ fi
 if [ $1 == "start" ]; then
 	setsid python3 $DIR/main.py > $DIR/socket_server.log 2>&1 </dev/null & 
 	echo $! > $DIR/pid.txt
-	setsid php -S localhost:8080 -t $DIR > $DIR/php.log 2>&1 </dev/null & 
+	setsid php -S 0.0.0.0:8080 -t $DIR > $DIR/php.log 2>&1 </dev/null & 
 	echo $! >> $DIR/pid.txt
 	echo "runing in $DIR"
 	
@@ -24,7 +24,9 @@ elif [ $1 == "stop" ]; then
 	do
 	  kill $var
 	done < "$DIR/pid.txt";
-	rm $DIR/pid.txt
+	if [ -f $DIR/pid.txt ]; then 
+		rm $DIR/pid.txt
+	fi
 	echo "shut down"
 else
 	print_help

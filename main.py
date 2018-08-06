@@ -38,8 +38,8 @@ class MessageQue:
 
 
 class ClientHandler:
-    def __init__(self, dbname: str):
-        self.db = Mydb(dbname)
+    def __init__(self, db: Mydb):
+        self.db = db
         self.datas = ""
         self.data_to_write = ""
 
@@ -152,6 +152,7 @@ class MyServer:
         print("{} running".format(threading.current_thread()))
         self.sel.register(self.lstn_sock, selectors.EVENT_READ, self.lstn_sock)
         self.keys = set()
+        self.db = Mydb(*self.initer)
 
         while self.enabled:
             for key, mask in self.sel.select(1):
@@ -159,7 +160,7 @@ class MyServer:
                     conn, addr = self.lstn_sock.accept()
                     print("server accteped: ", conn.fileno(), "from ", addr)
                     conn.setblocking(False)
-                    newkey = self.sel.register(conn, selectors.EVENT_READ, self.handlerClass(*self.initer))
+                    newkey = self.sel.register(conn, selectors.EVENT_READ, self.handlerClass(self.db))
                     self.keys.add(newkey)
                 else:
                     handler = key.data
@@ -208,10 +209,11 @@ class WebListener:
                     handler.on_ready_read(key, self.sel)
 
 
-
 if __name__ == "__main__":
+    path = os.path.dirname(os.path.realpath(__file__))
+    print(path)
     messageque = MessageQue()
-    client_server = MyServer('0.0.0.0', 8000, messageque, ClientHandler, ['test.db'])
+    client_server = MyServer('0.0.0.0', 8000, messageque, ClientHandler, [path+'/test.db'])
     web_listener = WebListener('localhost', 8001, messageque, WebHandler)
     t2 = Thread(target=web_listener.run)
     t1 = Thread(target=client_server.run)
