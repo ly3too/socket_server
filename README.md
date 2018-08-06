@@ -13,24 +13,25 @@ the socket server should be able to handle large amount of clients at the same t
 |send_message.php | backend to send message to socket server, users need not care|
 | main.py | the socket server |
 
-## fire up the socket server and web server
+## fire up the socket server and web server manualy without installation
 ```bash
+# in project directory
 python3 mian.py &
 php -S 0.0.0.0:8080 &
 ```
+
 ## clients connect to socket server
 use port: 8000
 
 protocol: raw socket
 
 ## install 
-
 ```bash
 sudo apt update
 sudo apt install php7.2-cli
 sudo apt install php7.2-sqlite3
 sudo apt install python3
-# in current directory
+# in project directory
 sh install.sh
 ```
 
@@ -44,4 +45,8 @@ sh uninstall.sh
 myserver start
 myserver stop
 ```
+
+## open the browser at http://<your ip or url>:8080
+you should se something like this
+![](./statics/imag1.png)
 
