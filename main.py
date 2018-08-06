@@ -25,7 +25,7 @@ class Mydb:
 
     def save_data(self, data: str):
         cur = self.db.cursor()
-        cur.execute("insert into datas values('{}', '{}')".format(datetime.now(), data))
+        cur.execute("insert into datas values(?, ?)", (datetime.now(), data))
         self.db.commit()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
