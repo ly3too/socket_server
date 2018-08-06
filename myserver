@@ -1,20 +1,32 @@
 #!/bin/bash
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-if [ $1 -eq "start" ]; then
-	python3 $DIR/main.py > socket_server.log & echo $! > pid.txt
-	php -S localhost:8080 -t $DIR > php_log.log & echo $! >> pid.txt
+function print_help {
+	echo "usage:"
+	printf "\tmyserver start # to start the server\n"
+	printf "\tmyserver stop # to stop the server\n"
+}
+
+#DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+DIR=$HOME/.local/myserver/
+if [ $# -lt 1 ]; then
+	 print_help
+	 exit 
+fi
+if [ $1 == "start" ]; then
+	setsid python3 $DIR/main.py > $DIR/socket_server.log 2>&1 </dev/null & 
+	echo $! > $DIR/pid.txt
+	setsid php -S localhost:8080 -t $DIR > $DIR/php.log 2>&1 </dev/null & 
+	echo $! >> $DIR/pid.txt
+	echo "runing in $DIR"
 	
-elif [ $1 -eq "stop" ]; then
+elif [ $1 == "stop" ]; then
 	while IFS= read -r var
 	do
-	  kill var
-	done < "$DIR/pid.txt"
+	  kill $var
+	done < "$DIR/pid.txt";
 	rm $DIR/pid.txt
-	
+	echo "shut down"
 else
-	echo "usage:"
-	echo "\tmyserver start # to start the server"
-	echo "\tmyserver stop # to stop the server"
+	print_help
 fi
 

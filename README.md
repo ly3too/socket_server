@@ -23,3 +23,25 @@ use port: 8000
 
 protocol: raw socket
 
+## install 
+
+```bash
+sudo apt update
+sudo apt install php7.2-cli
+sudo apt install php7.2-sqlite3
+sudo apt install python3
+# in current directory
+sh install.sh
+```
+
+## uninstall 
+```bash
+sh uninstall.sh
+```
+
+## run and stop the server
+```bash
+myserver start
+myserver stop
+```
+
