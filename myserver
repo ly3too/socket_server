@@ -1,0 +1,20 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+if [ $1 -eq "start" ]; then
+	python3 $DIR/main.py > socket_server.log & echo $! > pid.txt
+	php -S localhost:8080 -t $DIR > php_log.log & echo $! >> pid.txt
+	
+elif [ $1 -eq "stop" ]; then
+	while IFS= read -r var
+	do
+	  kill var
+	done < "$DIR/pid.txt"
+	rm $DIR/pid.txt
+	
+else
+	echo "usage:"
+	echo "\tmyserver start # to start the server"
+	echo "\tmyserver stop # to stop the server"
+fi
+
