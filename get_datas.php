@@ -15,12 +15,20 @@
       SELECT * from datas;
 EOF;
 
-   $ret = $db->query($sql);
-   while($row = $ret->fetchArray(SQLITE3_ASSOC) ) {
-      echo "<tr>\n";
-        echo "<td>". $row['time'] ."</td>\n";
-        echo "<td>". $row['data']  ."</td>\n";
-      echo "</tr>\n";
-   }
-   $db->close();
+	try{
+	   $ret = $db->query($sql);
+	   if (!$ret) {
+	   		echo $db->lastErrorMsg();
+	   		exit(1);
+	   }
+	   while($row = $ret->fetchArray(SQLITE3_ASSOC) ) {
+		  echo "<tr>\n";
+		    echo "<td>". $row['time'] ."</td>\n";
+		    echo "<td>". $row['data']  ."</td>\n";
+		  echo "</tr>\n";
+	   }
+	   $db->close();
+	} catch (Exception $e) {
+		echo "no data temporarily";
+	}
 ?>
