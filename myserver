@@ -13,7 +13,7 @@ if [ $# -lt 1 ]; then
 	 exit 
 fi
 if [ $1 == "start" ]; then
-	setsid python3 $DIR/main.py > $DIR/socket_server.log 2>&1 </dev/null & 
+	setsid python3 -u $DIR/main.py > $DIR/socket_server.log 2>&1 </dev/null & 
 	echo $! > $DIR/pid.txt
 	setsid php -S 0.0.0.0:8080 -t $DIR > $DIR/php.log 2>&1 </dev/null & 
 	echo $! >> $DIR/pid.txt
