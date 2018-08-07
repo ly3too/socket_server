@@ -31,6 +31,12 @@ $(document).ready(function(){
         	$container.load("get_datas.php");
         });
     });
+    
+    $("#data").keyup(function(event){
+		if(event.keyCode == 13){
+		$("#send_message").click();
+		}
+	});
 });
 </script>
 
@@ -57,7 +63,7 @@ $(document).ready(function(){
 
 <div class="container">
   <h2> send message to clients </h2>
-  <form>
+  <form onsubmit="return false">
     <div class="form-group">
       <label > enter message here: </label>
       <input class="form-control" id="data" placeholder="edit here" name="data">
