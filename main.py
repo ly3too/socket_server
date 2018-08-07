@@ -23,7 +23,7 @@ class Mydb:
         self.db.execute("create table if not exists datas(time datetime, data text)")
         self.db.commit()
 
-    def save_data(self, data: str):
+    def save_data(self, data):
         cur = self.db.cursor()
         cur.execute("insert into datas values(?, ?)", (datetime.now(), data))
         self.db.commit()
@@ -33,15 +33,15 @@ class Mydb:
 
 class MessageQue:
     def __init__(self):
-        self.data = ""
+        self.data = b""
         self.lock = Lock()
 
 
 class ClientHandler:
     def __init__(self, db: Mydb):
         self.db = db
-        self.datas = ""
-        self.data_to_write = ""
+        self.datas = b""
+        self.data_to_write = b""
 
     def on_ready_read(self, key, sel: selectors.EpollSelector, keys):
         '''
@@ -51,7 +51,7 @@ class ClientHandler:
         data = b''
         try:
             data = key.fileobj.recv(1024)
-            print("client read: " + data.decode('utf-8'))
+            print("client read: " + data.decode('utf-8', errors='ignore'))
         except IOError as e:
             print(e.strerror)
 
@@ -64,20 +64,20 @@ class ClientHandler:
 
             # sink data left
             if self.datas:
-                if self.datas[-1] != '\n':
-                    self.datas += '\n'
+                if self.datas[-1] != b'\n':
+                    self.datas += b'\n'
                 self.db.save_data(self.datas)
-                self.datas = ""
+                self.datas = b""
 
         else:
             # received some data
-            self.datas += data.decode()
-            datas = self.datas.split('\n')
+            self.datas += data
+            datas = self.datas.split(b'\n')
             for i in range(len(datas)-1):
                 self.db.save_data(datas[i])
             self.datas = datas[-1]
 
-    def on_ready_write(self, key, data:str, keys:set):
+    def on_ready_write(self, key, data, keys:set):
         '''
         check if data ready in messageque, append to the buffer of itself. try to send all data to client
         :return:
@@ -85,7 +85,7 @@ class ClientHandler:
         print("send message to client: ", key.fd)
         try:
             self.data_to_write += data
-            num = key.fileobj.send(self.data_to_write.encode())
+            num = key.fileobj.send(self.data_to_write)
             self.data_to_write = self.data_to_write[num:]
         except IOError as e:
             print(e.strerror)
@@ -97,7 +97,7 @@ class ClientHandler:
 class WebHandler:
     def __init__(self, messageque: MessageQue):
         self.messageque = messageque
-        self.datas = ""
+        self.datas = b""
 
     def on_ready_read(self, key, sel: selectors.EpollSelector):
         '''
@@ -107,7 +107,7 @@ class WebHandler:
         data = b''
         try:
             data = key.fileobj.recv(1024)
-            print('received from webserver: ', data.decode())
+            print('received from webserver: ', data.decode(errors='ignore'))
         except IOError as e:
             print(e.strerror)
 
@@ -117,18 +117,18 @@ class WebHandler:
             sel.unregister(key.fileobj)
             key.fileobj.close()
             if self.datas:
-                if self.datas[-1] != '\n':
-                    self.datas += '\n'
+                if self.datas[-1] != b'\n':
+                    self.datas += b'\n'
                 self.messageque.lock.acquire()
                 self.messageque.data += self.datas
                 self.messageque.lock.release()
         else:
             # received some data
-            self.datas += data.decode()
-            datas = self.datas.split('\n')
+            self.datas += data
+            datas = self.datas.split(b'\n')
             self.messageque.lock.acquire()
             for i in range(len(datas)-1):
-                self.messageque.data += datas[i] + '\n'
+                self.messageque.data += datas[i] + b'\n'
             self.messageque.lock.release()
             self.datas = datas[-1]
 
@@ -169,10 +169,10 @@ class MyServer:
 
             # check if there is data to write to clients
             self.messageque.lock.acquire()
-            data_from_web = ""
+            data_from_web = b""
             if (self.messageque.data):
                 data_from_web = copy.deepcopy(self.messageque.data)
-                self.messageque.data = ""
+                self.messageque.data = b""
             self.messageque.lock.release()
             if data_from_web:
                 for key in self.keys.copy():
