@@ -11,7 +11,7 @@
  <script>
 $(document).ready(function(){
     $("#send_message").click(function(){
-        $.get("send_message.php?message=" + $("#data").val(),
+        $.get("send_message.php?message=" + escape($("#data").val()),
         function (data, status) {
         	$("#div1").html(data);
         });
